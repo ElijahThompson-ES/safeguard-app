@@ -28,6 +28,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   async function loadHazards() {
     setLoading(true);
@@ -74,6 +75,7 @@ export default function Dashboard() {
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
+      if (cameraInputRef.current) cameraInputRef.current.value = '';
     }
   }
 
@@ -120,15 +122,66 @@ export default function Dashboard() {
 
       {/* Upload card */}
       <div style={cardStyle}>
-        <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 12 }}>📷 Upload image for hazard analysis</div>
+        <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 12 }}>📷 Add image for hazard analysis</div>
+
+        {/* Hidden inputs */}
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          capture="environment"
+          onChange={handleFileSelect}
+          disabled={uploading}
+          style={{ display: 'none' }}
+        />
         <input
           ref={fileInputRef}
           type="file"
           accept="image/jpeg,image/png,image/webp"
           onChange={handleFileSelect}
           disabled={uploading}
-          style={{ marginBottom: 10 }}
+          style={{ display: 'none' }}
         />
+
+        {/* Visible buttons */}
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            disabled={uploading}
+            style={{
+              fontSize: 14,
+              padding: '10px 18px',
+              borderRadius: 8,
+              border: 'none',
+              background: '#185FA5',
+              color: '#fff',
+              fontWeight: 500,
+              cursor: uploading ? 'not-allowed' : 'pointer',
+              opacity: uploading ? 0.6 : 1,
+            }}
+          >
+            📸 Take Photo
+          </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            style={{
+              fontSize: 14,
+              padding: '10px 18px',
+              borderRadius: 8,
+              border: '0.5px solid var(--border)',
+              background: 'transparent',
+              color: 'var(--text-primary)',
+              cursor: uploading ? 'not-allowed' : 'pointer',
+              opacity: uploading ? 0.6 : 1,
+            }}
+          >
+            🖼 Choose from library
+          </button>
+        </div>
+
         {uploading && (
           <div style={{ fontSize: 13, color: 'var(--accent)' }}>
             Analyzing image with Claude… this takes a few seconds
@@ -153,7 +206,7 @@ export default function Dashboard() {
         {loading && <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Loading…</div>}
         {!loading && hazards.length === 0 && (
           <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            No hazards yet — upload an image above to run your first scan.
+            No hazards yet — add an image above to run your first scan.
           </div>
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
